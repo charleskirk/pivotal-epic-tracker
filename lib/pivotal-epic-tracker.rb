@@ -33,7 +33,7 @@ module PivotalEpicTracker
 
     def initialize(project)
       @project = project
-      @epic_label = label
+      @epic_label = get_next_release_label
       @stories = get_stories
       @stories_labels = get_labels
     end
