@@ -35,7 +35,7 @@ module PivotalEpicTracker
       @project = project
       @epic_label = get_next_release_label
       @stories = get_stories
-      @stories_labels = get_labels
+      @stories_labels = @project.labels.split(',')
     end
 
     def get_status
@@ -56,17 +56,6 @@ module PivotalEpicTracker
 
     def get_stories
       @project.stories.all(:label => @epic_label, :includedone => true)
-    end
-
-    def get_labels
-      labels = []
-      @stories.each do |s|
-        s.labels.each do |l|
-          temp = l.split(",")
-          labels << temp
-        end
-      end
-      labels.flatten
     end
 
     def get_num_stories_delivered
