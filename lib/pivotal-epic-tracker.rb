@@ -31,7 +31,7 @@ module PivotalEpicTracker
   class EpicStatus
     attr_accessor :num_stories, :num_stories_delivered, :epic_label
 
-    def initialize(project, label)
+    def initialize(project)
       @project = project
       @epic_label = label
       @stories = get_stories
