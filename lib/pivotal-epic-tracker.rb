@@ -22,14 +22,14 @@ module PivotalEpicTracker
   # and whether it is specced, designed, tested. Also gives visibility to the 
   # number of total stories and how many of those are delivered.
   #
-  def get_epic_status(project, label)
-    e = EpicStatus.new(project, label)
+  def get_epic_status(project)
+    e = EpicStatus.new(project)
     e.get_status
     e
   end
 
   class EpicStatus
-    attr_accessor :specced, :designed, :tested, :num_stories, :num_stories_delivered
+    attr_accessor :num_stories, :num_stories_delivered, :epic_label
 
     def initialize(project, label)
       @project = project
@@ -41,9 +41,17 @@ module PivotalEpicTracker
     def get_status
       self.num_stories = @stories.size
       self.num_stories_delivered = get_num_stories_delivered
-      self.specced = is_specced?
-      self.designed = is_designed?
-      self.tested = is_tested?
+      self.epic_label = get_next_release_label
+    end
+    
+    def get_next_release_label
+      @labels = []
+      @project.labels.split(',').each do |label|
+        if label[0..2] == 'ver'
+          @labels << label
+        end
+      end
+      @labels.sort!.last
     end
 
     def get_stories
@@ -59,27 +67,6 @@ module PivotalEpicTracker
         end
       end
       labels.flatten
-    end
-
-    def is_specced?
-      if self.num_stories_delivered == self.num_stories && self.num_stories != 0
-        true
-      else
-        @stories_labels.include?("needs-design")
-      end
-    end
-
-    def is_designed?
-      if self.num_stories_delivered == self.num_stories && self.num_stories != 0
-        true
-      else
-        @stories_labels.include?("ready-to-code")
-      end
-    end
-
-    def is_tested?
-      untested_stories = @stories.reject {|s| s.current_state == 'accepted'}
-      untested_stories.size == 0 && self.num_stories != 0
     end
 
     def get_num_stories_delivered
