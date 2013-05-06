@@ -47,7 +47,7 @@ module PivotalEpicTracker
     def get_next_release_label
       @labels = []
       @project.labels.split(',').each do |label|
-        if label[0..2] == 'ver'
+        if label[0..2] == 'ver' && label[3] != 's'
           @labels << label
         end
       end
