@@ -66,7 +66,7 @@ module PivotalEpicTracker
           @labels << label
         end
       end
-      @labels.sort!.reverse!
+      @labels.sort!
       @labels.each do |label|
         percent = get_percentage_complete(label)
         next if percent == 100 || percent == false
