@@ -22,40 +22,63 @@ module PivotalEpicTracker
   # and whether it is specced, designed, tested. Also gives visibility to the 
   # number of total stories and how many of those are delivered.
   #
-  def get_epic_status(project)
+  def get_epic_statuses(project)
     e = EpicStatus.new(project)
-    e.get_status
+    e.get_statuses
     e
   end
 
   class EpicStatus
-    attr_accessor :num_stories, :num_stories_delivered, :epic_label
+    attr_accessor :num_stories, :num_stories_delivered, :epic_labels
 
     def initialize(project)
       @project = project
-      @epic_label = get_next_release_label
-      @stories = get_stories
       @stories_labels = @project.labels.split(',')
     end
 
-    def get_status
-      self.num_stories = @stories.size
-      self.num_stories_delivered = get_num_stories_delivered
-      self.epic_label = get_next_release_label
+    def get_statuses
+      self.epic_labels = get_next_release_labels
     end
     
-    def get_next_release_label
+    def get_status(label)
+      self.num_stories = @stories.size
+      self.num_stories_delivered = get_num_stories_delivered
+    end
+    
+    def get_percentage_complete(label)
+      stories_delivered = 0
+      allStories = get_stories(label)
+      allStories.each {|s| stories_delivered += 1 if s.current_state == 'delivered' || s.current_state == 'accepted'}
+      if !stories_delivered
+        percent = 0
+      else
+        percent = (stories_delivered.to_f/allStories.size.to_f)*100
+      end
+      percent
+    end
+    
+    def get_next_release_labels
       @labels = []
-      @project.labels.split(',').each do |label|
+      @releases = []
+      @stories_labels.each do |label|
         if label[0..2] == 'ver' && label[3] != 's'
           @labels << label
         end
       end
-      @labels.sort!.last
+      @labels.sort!.reverse!
+      @labels.each do |label|
+        percent = get_percentage_complete(label)
+        next if percent == 100
+        @releases << {
+          :release => label,
+          :percentage_complete => percent
+        }
+      end
+      @releases
     end
 
-    def get_stories
-      @project.stories.all(:label => @epic_label, :includedone => true)
+    def get_stories(label)
+      @project.stories.all(:label => label, :includedone => true)
     end
 
     def get_num_stories_delivered
