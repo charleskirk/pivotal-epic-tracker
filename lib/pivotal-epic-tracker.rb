@@ -71,7 +71,7 @@ module PivotalEpicTracker
         percent = get_percentage_complete(label)
         next if percent == 100 || percent == false
         @releases << {
-          :release => 'Version ' + label.split('ver')[1],
+          :release => label.split('ver')[1],
           :percentage_complete => percent
         }
       end
