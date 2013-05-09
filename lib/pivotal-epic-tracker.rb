@@ -49,6 +49,7 @@ module PivotalEpicTracker
       stories_delivered = 0
       allStories = get_stories(label)
       allStories.each {|s| stories_delivered += 1 if s.current_state == 'delivered' || s.current_state == 'accepted'}
+      return false if allStories.size == 0
       if !stories_delivered
         percent = 0
       else
@@ -61,14 +62,14 @@ module PivotalEpicTracker
       @labels = []
       @releases = []
       @stories_labels.each do |label|
-        if label[0..2] == 'ver' && label[3] != 's'
+        if label[0..2] == 'ver' && label[3] != 's' && label[3] != ' '
           @labels << label
         end
       end
       @labels.sort!.reverse!
       @labels.each do |label|
         percent = get_percentage_complete(label)
-        next if percent == 100
+        next if percent == 100 || percent == false
         @releases << {
           :release => label,
           :percentage_complete => percent
